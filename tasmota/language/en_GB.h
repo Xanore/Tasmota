@@ -831,6 +831,9 @@
 #define D_SENSOR_ZEROCROSS     "ZC Pulse"
 #define D_SENSOR_HALLEFFECT    "HallEffect"
 #define D_SENSOR_EPD_DATA      "EPD Data"
+#define D_SENSOR_RC_TOUCH_BTN_OUT    "Touch btn Out"
+#define D_SENSOR_RC_TOUCH_BTN_IN   "Touch btn In"
+#warning JJN: Add Touch out/in to other language files
 
 // Units
 #define D_UNIT_AMPERE "A"

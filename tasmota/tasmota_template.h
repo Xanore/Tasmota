@@ -169,6 +169,8 @@ enum UserSelectablePins {
   GPIO_I2S_OUT_DATA, GPIO_I2S_OUT_CLK, GPIO_I2S_OUT_SLCT,
   GPIO_I2S_IN_DATA,  GPIO_I2S_IN_CLK,  GPIO_I2S_IN_SLCT,
   GPIO_INTERRUPT,
+  GPIO_RC_TOUCH_BTN_OUT,
+  GPIO_RC_TOUCH_BTN_IN,
   GPIO_SENSOR_END };
 
 enum ProgramSelectablePins {
@@ -358,6 +360,8 @@ const char kSensorNames[] PROGMEM =
   D_SENSOR_I2S_OUT_DATA "|" D_SENSOR_I2S_OUT_CLK "|" D_SENSOR_I2S_OUT_SLCT "|"
   D_SENSOR_I2S_IN_DATA  "|" D_SENSOR_I2S_IN_CLK  "|" D_SENSOR_I2S_IN_SLCT  "|"
   D_SENSOR_INTERRUPT "|"
+  D_SENSOR_RC_TOUCH_BTN_OUT "|"
+  D_SENSOR_RC_TOUCH_BTN_IN "|"
   ;
 
 const char kSensorNamesFixed[] PROGMEM =
@@ -422,6 +426,10 @@ const uint16_t kGpioNiceList[] PROGMEM = {
 #ifdef USE_BS814A2
   AGPIO(GPIO_BS814_CLK),                // Holtek BS814A2 touch ctrlr
   AGPIO(GPIO_BS814_DAT),
+#endif
+#ifdef USE_RC_TOUCH_BTN
+  AGPIO(GPIO_RC_TOUCH_BTN_OUT),
+  AGPIO(GPIO_RC_TOUCH_BTN_IN),
 #endif
 
 /*-------------------------------------------------------------------------------------------*\
