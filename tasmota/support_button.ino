@@ -130,7 +130,7 @@ void ButtonInit(void)
     if (rcTouchOutPresent) // Check if both in and out are present
     {
       Button.present++;
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "Initialized RC Touch"));
+      RcTouchBtnInit();
     }
   }
   if (PinUsed(GPIO_RC_TOUCH_BTN_OUT))
@@ -140,7 +140,7 @@ void ButtonInit(void)
     if (rcTouchInPresent) // Check if both in and out are present
     {
       Button.present++;
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "Initialized RC Touch"));
+      RcTouchBtnInit();
     }
   }
 #endif // USE_RC_TOUCH_BTN
@@ -278,7 +278,7 @@ void ButtonHandler(void)
     else if (PinUsed(GPIO_RC_TOUCH_BTN_IN) && PinUsed(GPIO_RC_TOUCH_BTN_OUT))
     {
       button_present = 1;
-      button = RcTouchGetButton(Pin(GPIO_RC_TOUCH_BTN_IN), Pin(GPIO_RC_TOUCH_BTN_OUT));
+      button = RcTouchGetButton();
     }
 
 #endif // USE_RC_TOUCH_BTN
