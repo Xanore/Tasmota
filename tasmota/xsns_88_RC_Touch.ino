@@ -39,6 +39,7 @@ struct xsns_88_rcTouchBtn
   uint16_t rawTouchRead[AVERAGECOUNT];
   uint8_t i_rawTouchRead = 0;
   uint16_t touchTreshold = 0;
+  bool touched = false;
 } rcTouchBtn_data;
 
 void RcTouchBtnInit()
@@ -82,17 +83,40 @@ bool SensorIsTouched()
     {
       sum += rcTouchBtn_data.rawTouchRead[i];
     }
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "TouchValue=%d"), (sum / AVERAGECOUNT));
-    return (sum / AVERAGECOUNT) < rcTouchBtn_data.touchTreshold;
+    //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "TouchValue=%d"), (sum / AVERAGECOUNT));
+    return (sum / AVERAGECOUNT) > rcTouchBtn_data.touchTreshold;
   }
   return false;
 }
 
 uint8_t RcTouchGetButton()
 {
-  if (SensorIsTouched())
-    return 1;
-  return 0;
+  bool touched = SensorIsTouched();
+  if (touched != rcTouchBtn_data.touched)
+  {
+    rcTouchBtn_data.touched = touched;
+    MqttTouchButtonTopic(rcTouchBtn_data.touched);
+    if (rcTouchBtn_data.touched)
+    {
+      //MqttTouchButtonTopic(rcTouchBtn_data.touched);
+      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Touchbutton touched"));
+    }
+    else
+    {
+      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Touchbutton released"));
+    }
+  }
+  return touched;
+}
+
+void MqttTouchButtonTopic(bool touched)
+{
+    char scommand[10];
+    snprintf_P(scommand, sizeof(scommand), PSTR(D_JSON_BUTTON));
+    char mqttstate[7];
+    #warning JJN: Move touched and released to a generic plase
+    Response_P(S_JSON_SVALUE_ACTION_SVALUE, scommand, (touched) ? D_JSON_TOUCHED : D_JSON_RELEASED);
+    MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_STAT, scommand);
 }
 
 /*********************************************************************************************\
@@ -107,8 +131,12 @@ bool Xsns88(byte callback_id)
   switch (callback_id)
   {
   case FUNC_INIT:
+    RcTouchBtnInit();
     break;
   case FUNC_EVERY_50_MSECOND:
+
+    RcTouchGetButton();
+
     break;
   case FUNC_EVERY_SECOND:
     break;

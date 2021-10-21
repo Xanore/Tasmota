@@ -123,26 +123,26 @@ void ButtonInit(void)
 #endif // USE_ADC
   }
 #ifdef USE_RC_TOUCH_BTN
-  if (PinUsed(GPIO_RC_TOUCH_BTN_IN))
-  {
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "Touch IN used"));
-    rcTouchInPresent = true;
-    if (rcTouchOutPresent) // Check if both in and out are present
-    {
-      Button.present++;
-      RcTouchBtnInit();
-    }
-  }
-  if (PinUsed(GPIO_RC_TOUCH_BTN_OUT))
-  {
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "Touch OUT used"));
-    rcTouchOutPresent = true;
-    if (rcTouchInPresent) // Check if both in and out are present
-    {
-      Button.present++;
-      RcTouchBtnInit();
-    }
-  }
+  // if (PinUsed(GPIO_RC_TOUCH_BTN_IN))
+  // {
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "Touch IN used"));
+  //   rcTouchInPresent = true;
+  //   if (rcTouchOutPresent) // Check if both in and out are present
+  //   {
+  //     Button.present++;
+  //     RcTouchBtnInit();
+  //   }
+  // }
+  // if (PinUsed(GPIO_RC_TOUCH_BTN_OUT))
+  // {
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "Touch OUT used"));
+  //   rcTouchOutPresent = true;
+  //   if (rcTouchInPresent) // Check if both in and out are present
+  //   {
+  //     Button.present++;
+  //     RcTouchBtnInit();
+  //   }
+  // }
 #endif // USE_RC_TOUCH_BTN
 
   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "ButtonInit ready count=%d"), Button.present);
@@ -275,12 +275,12 @@ void ButtonHandler(void)
     }
 #endif // USE_ADC
 #ifdef USE_RC_TOUCH_BTN
-    else if (PinUsed(GPIO_RC_TOUCH_BTN_IN) && PinUsed(GPIO_RC_TOUCH_BTN_OUT))
-    {
-      button_present = 1;
-      button = RcTouchGetButton();
-    }
-
+    // else if (PinUsed(GPIO_RC_TOUCH_BTN_IN) && PinUsed(GPIO_RC_TOUCH_BTN_OUT))
+    // {
+    //   button_present = 1;
+    //   button = RcTouchGetButton();
+    // }
+#warning JJN Remove unused code
 #endif // USE_RC_TOUCH_BTN
 
     if (button_present)
