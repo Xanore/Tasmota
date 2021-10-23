@@ -122,30 +122,6 @@ void ButtonInit(void)
     }
 #endif // USE_ADC
   }
-#ifdef USE_RC_TOUCH_BTN
-  // if (PinUsed(GPIO_RC_TOUCH_BTN_IN))
-  // {
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "Touch IN used"));
-  //   rcTouchInPresent = true;
-  //   if (rcTouchOutPresent) // Check if both in and out are present
-  //   {
-  //     Button.present++;
-  //     RcTouchBtnInit();
-  //   }
-  // }
-  // if (PinUsed(GPIO_RC_TOUCH_BTN_OUT))
-  // {
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "Touch OUT used"));
-  //   rcTouchOutPresent = true;
-  //   if (rcTouchInPresent) // Check if both in and out are present
-  //   {
-  //     Button.present++;
-  //     RcTouchBtnInit();
-  //   }
-  // }
-#endif // USE_RC_TOUCH_BTN
-
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "ButtonInit ready count=%d"), Button.present);
 }
 
 uint8_t ButtonSerial(uint8_t serial_in_byte)
@@ -274,14 +250,6 @@ void ButtonHandler(void)
       button = AdcGetButton(Pin(GPIO_ADC_BUTTON_INV, button_index));
     }
 #endif // USE_ADC
-#ifdef USE_RC_TOUCH_BTN
-    // else if (PinUsed(GPIO_RC_TOUCH_BTN_IN) && PinUsed(GPIO_RC_TOUCH_BTN_OUT))
-    // {
-    //   button_present = 1;
-    //   button = RcTouchGetButton();
-    // }
-#warning JJN Remove unused code
-#endif // USE_RC_TOUCH_BTN
 
     if (button_present)
     {
