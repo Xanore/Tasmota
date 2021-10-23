@@ -17,9 +17,10 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define USE_RC_TOUCH_BTN
+#warning JJN Remove this define
+#define XSNS_88_USE_RC_TOUCH_BTN
 
-#ifdef USE_RC_TOUCH_BTN
+#ifdef XSNS_88_USE_RC_TOUCH_BTN
 /*********************************************************************************************\
  * Touch support for ESP8266 using two GPIO channels, a resistor and optional capacitor
 \*********************************************************************************************/
@@ -38,7 +39,6 @@ struct xsns_88_rcTouchBtn
   uint8_t readSensorSamples = 0;
   uint16_t rawTouchRead[AVERAGECOUNT];
   uint8_t i_rawTouchRead = 0;
-  uint16_t touchTreshold = 0;
   bool touched = false;
 } rcTouchBtn_data;
 
@@ -53,8 +53,14 @@ void RcTouchBtnInit()
 
       rcTouchBtn_data.readSensorSamples = 100;
       rcTouchBtn_data.i_rawTouchRead = 0;
-      rcTouchBtn_data.touchTreshold = 100;
-#warning XAN: Add option to write treshold remotely, and maybe debug which writes average value every xx seconds?
+
+#warning JJN Init setting
+      // Init touch threshold to something usefull
+      if (Settings->rct_threshold == 0)
+        Settings->rct_threshold = 100;
+
+      //rcTouchBtn_data.touchTreshold = 100;
+#warning JJN: Add option to write treshold remotely, and maybe debug which writes average value every xx seconds?
 
       // Fill touch array with values
       for (int i_raw = 0; i_raw < AVERAGECOUNT; i_raw++)
@@ -84,7 +90,7 @@ bool SensorIsTouched()
       sum += rcTouchBtn_data.rawTouchRead[i];
     }
     //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "TouchValue=%d"), (sum / AVERAGECOUNT));
-    return (sum / AVERAGECOUNT) > rcTouchBtn_data.touchTreshold;
+    return (sum / AVERAGECOUNT) > Settings->rct_threshold;
   }
   return false;
 }
@@ -97,26 +103,58 @@ uint8_t RcTouchGetButton()
     rcTouchBtn_data.touched = touched;
     MqttTouchButtonTopic(rcTouchBtn_data.touched);
     if (rcTouchBtn_data.touched)
-    {
-      //MqttTouchButtonTopic(rcTouchBtn_data.touched);
       AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Touchbutton touched"));
-    }
     else
-    {
       AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Touchbutton released"));
-    }
   }
   return touched;
 }
 
 void MqttTouchButtonTopic(bool touched)
 {
-    char scommand[10];
-    snprintf_P(scommand, sizeof(scommand), PSTR(D_JSON_BUTTON));
-    char mqttstate[7];
-    #warning JJN: Move touched and released to a generic plase
-    Response_P(S_JSON_SVALUE_ACTION_SVALUE, scommand, (touched) ? D_JSON_TOUCHED : D_JSON_RELEASED);
-    MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_STAT, scommand);
+  char scommand[10];
+  snprintf_P(scommand, sizeof(scommand), PSTR(D_JSON_BUTTON));
+  char mqttstate[7];
+#warning JJN: Move touched and released to a generic plase
+  Response_P(S_JSON_SVALUE_ACTION_SVALUE, scommand, (touched) ? D_JSON_TOUCHED : D_JSON_RELEASED);
+  MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_STAT, scommand);
+}
+
+/*********************************************************************************************\
+ * Commands
+\*********************************************************************************************/
+
+/*********************************************************************************************\
+ * Commands
+ *
+ * NPFiltration {<state> {speed}}
+ *            get/set manual filtration (state = 0|1, speed = 1..3)
+ *            get filtration state if <state> is omitted, otherwise set new state
+ *            for non-standard filtration types additional speed control is possible
+ *
+ *********************************************************************************************/
+
+#define D_PRFX_RC_TOUCH "RCT"
+#define D_CMND_RCT_THRESHOLD "Threshold"
+
+const char kRCTCommands[] PROGMEM = D_PRFX_RC_TOUCH "|" // Prefix
+    D_CMND_RCT_THRESHOLD;
+
+void (*const RCTCommand[])(void) PROGMEM = {
+    &CmndTouchThreshold};
+
+void CmndTouchThreshold()
+{
+  if (XdrvMailbox.data_len > 0) {
+    Settings->rct_threshold = strtoul(XdrvMailbox.data, nullptr, 0);
+    #warning JJN Setting is not stored in EEPROM
+  }
+  ResponseCmndNumber(Settings->rct_threshold);
+}
+
+void CmndError(void)
+{
+  Response_P(PSTR("{\"" D_JSON_COMMAND "\":\"" D_JSON_ERROR "\"}"));
 }
 
 /*********************************************************************************************\
@@ -149,9 +187,10 @@ bool Xsns88(byte callback_id)
   case FUNC_SAVE_BEFORE_RESTART:
     break;
   case FUNC_COMMAND:
+    result = DecodeCommand(kRCTCommands, RCTCommand);
     break;
   }
   return result;
 }
 
-#endif // USE_RC_TOUCH_BTN
+#endif // XSNS_88_USE_RC_TOUCH_BTN
