@@ -39,7 +39,9 @@ struct xsns_88_rcTouchBtn
   uint8_t readSensorSamples = 0;
   uint16_t rawTouchRead[AVERAGECOUNT];
   uint8_t i_rawTouchRead = 0;
+  uint16_t filteredRawTouchRead = 0;
   bool touched = false;
+  bool logRawTouch = false;
 } rcTouchBtn_data;
 
 void RcTouchBtnInit()
@@ -54,13 +56,9 @@ void RcTouchBtnInit()
       rcTouchBtn_data.readSensorSamples = 100;
       rcTouchBtn_data.i_rawTouchRead = 0;
 
-#warning JJN Init setting
       // Init touch threshold to something usefull
       if (Settings->rct_threshold == 0)
         Settings->rct_threshold = 100;
-
-      //rcTouchBtn_data.touchTreshold = 100;
-#warning JJN: Add option to write treshold remotely, and maybe debug which writes average value every xx seconds?
 
       // Fill touch array with values
       for (int i_raw = 0; i_raw < AVERAGECOUNT; i_raw++)
@@ -89,8 +87,9 @@ bool SensorIsTouched()
     {
       sum += rcTouchBtn_data.rawTouchRead[i];
     }
-    //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "TouchValue=%d"), (sum / AVERAGECOUNT));
-    return (sum / AVERAGECOUNT) > Settings->rct_threshold;
+    rcTouchBtn_data.filteredRawTouchRead = (sum / AVERAGECOUNT);
+
+    return rcTouchBtn_data.filteredRawTouchRead > Settings->rct_threshold;
   }
   return false;
 }
@@ -127,29 +126,45 @@ void MqttTouchButtonTopic(bool touched)
 /*********************************************************************************************\
  * Commands
  *
- * NPFiltration {<state> {speed}}
- *            get/set manual filtration (state = 0|1, speed = 1..3)
- *            get filtration state if <state> is omitted, otherwise set new state
- *            for non-standard filtration types additional speed control is possible
+ * RCTThreshold {threshold}
+ *            get/set the threshold (integer) for the capacitive sensor to toggle a 
+ *            touched/released signal. typically this is set around 100 but might differ 
+ *            depending on the size of the touch area. Setting is persistent.
  *
+ * RCTLogRawData {0/1}
+ *            get/set logging of raw sensor data. Data is send every 1 seconds and can be
+ *            used. Setting is not persistent.
+ * 
  *********************************************************************************************/
 
 #define D_PRFX_RC_TOUCH "RCT"
 #define D_CMND_RCT_THRESHOLD "Threshold"
+#define D_CMND_RCT_LOGRAWDATA "ShowSensorData"
 
 const char kRCTCommands[] PROGMEM = D_PRFX_RC_TOUCH "|" // Prefix
-    D_CMND_RCT_THRESHOLD;
+    D_CMND_RCT_THRESHOLD "|"
+    D_CMND_RCT_LOGRAWDATA;
 
 void (*const RCTCommand[])(void) PROGMEM = {
-    &CmndTouchThreshold};
+    &CmndTouchThreshold,
+    &CmndLogRawData};
 
 void CmndTouchThreshold()
 {
-  if (XdrvMailbox.data_len > 0) {
+  if (XdrvMailbox.data_len > 0)
+  {
     Settings->rct_threshold = strtoul(XdrvMailbox.data, nullptr, 0);
-    #warning JJN Setting is not stored in EEPROM
   }
   ResponseCmndNumber(Settings->rct_threshold);
+}
+
+void CmndLogRawData()
+{
+  if (XdrvMailbox.data_len == 1)
+  {
+    rcTouchBtn_data.logRawTouch = (XdrvMailbox.data[0] == '1') ? 1 : 0;
+  }
+  ResponseCmndNumber(rcTouchBtn_data.logRawTouch);
 }
 
 void CmndError(void)
@@ -177,6 +192,10 @@ bool Xsns88(byte callback_id)
 
     break;
   case FUNC_EVERY_SECOND:
+    if (rcTouchBtn_data.logRawTouch)
+    {
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "RC Touch RAW value %d"), rcTouchBtn_data.filteredRawTouchRead);
+    }
     break;
   case FUNC_JSON_APPEND:
     break;
