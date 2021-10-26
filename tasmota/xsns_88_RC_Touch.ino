@@ -34,6 +34,7 @@
 
 struct xsns_88_rcTouchBtn
 {
+  bool present = false;
   bool ready = false;
   CapacitiveSensor *sensor;
   uint8_t readSensorSamples = 0;
@@ -49,7 +50,9 @@ void InitRCTouch()
   if (!rcTouchBtn_data.ready)
   {
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "RC Touch Init"));
-    if (PinUsed(GPIO_RC_TOUCH_BTN_OUT) && PinUsed(GPIO_RC_TOUCH_BTN_IN))
+
+    rcTouchBtn_data.present = PinUsed(GPIO_RC_TOUCH_BTN_OUT) && PinUsed(GPIO_RC_TOUCH_BTN_IN);
+    if (rcTouchBtn_data.present)
     {
       rcTouchBtn_data.sensor = new CapacitiveSensor(Pin(GPIO_RC_TOUCH_BTN_OUT), Pin(GPIO_RC_TOUCH_BTN_IN));
 
@@ -73,29 +76,33 @@ void InitRCTouch()
 
 uint16_t GetFilteredSensorValue()
 {
-  if (rcTouchBtn_data.ready)
+  // Read raw value into shift register
+  rcTouchBtn_data.rawTouchRead[rcTouchBtn_data.i_rawTouchRead] = rcTouchBtn_data.sensor->capacitiveSensor(rcTouchBtn_data.readSensorSamples);
+  rcTouchBtn_data.i_rawTouchRead++;
+  if (rcTouchBtn_data.i_rawTouchRead >= AVERAGECOUNT)
+    rcTouchBtn_data.i_rawTouchRead = 0;
+
+  // Calculate average
+  uint16_t sum = 0;
+  for (uint8_t i = 0; i < AVERAGECOUNT; i++)
   {
-    // Read raw value into shift register
-    rcTouchBtn_data.rawTouchRead[rcTouchBtn_data.i_rawTouchRead] = rcTouchBtn_data.sensor->capacitiveSensor(rcTouchBtn_data.readSensorSamples);
-    rcTouchBtn_data.i_rawTouchRead++;
-    if (rcTouchBtn_data.i_rawTouchRead >= AVERAGECOUNT)
-      rcTouchBtn_data.i_rawTouchRead = 0;
-
-    // Calculate average
-    uint16_t sum = 0;
-    for (uint8_t i = 0; i < AVERAGECOUNT; i++)
-    {
-      sum += rcTouchBtn_data.rawTouchRead[i];
-    }
-    rcTouchBtn_data.filteredRawTouchRead = (sum / AVERAGECOUNT);
-
-    return rcTouchBtn_data.filteredRawTouchRead;
+    sum += rcTouchBtn_data.rawTouchRead[i];
   }
-  return false;
+  rcTouchBtn_data.filteredRawTouchRead = (sum / AVERAGECOUNT);
+
+  return rcTouchBtn_data.filteredRawTouchRead;
 }
 
-bool GetTouchButtonStatus()
+void GetTouchButtonStatus()
 {
+  if (!rcTouchBtn_data.present || !rcTouchBtn_data.ready)
+    return;
+
+  if (TasmotaGlobal.uptime < 4)
+  {
+    return;
+  } // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
+
   uint16_t sensorValue = GetFilteredSensorValue();
   bool touched = sensorValue > Settings->rct_threshold;
 
@@ -104,18 +111,13 @@ bool GetTouchButtonStatus()
   {
     rcTouchBtn_data.touched = touched;
     MqttTouchButtonTopic(rcTouchBtn_data.touched);
-    if (rcTouchBtn_data.touched)
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Touchbutton touched"));
-    else
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Touchbutton released"));
   }
-  return touched;
 }
 
 void MqttTouchButtonTopic(bool touched)
 {
   char scommand[10];
-  snprintf_P(scommand, sizeof(scommand), PSTR(D_JSON_BUTTON));
+  snprintf_P(scommand, sizeof(scommand), PSTR(D_JSON_TOUCH_BTN));
   char mqttstate[7];
 
 #warning JJN: Move touched and released to a generic plase
@@ -146,8 +148,7 @@ void MqttTouchButtonTopic(bool touched)
 #define D_CMND_RCT_LOGRAWDATA "ShowSensorData"
 
 const char kRCTCommands[] PROGMEM = D_PRFX_RC_TOUCH "|" // Prefix
-    D_CMND_RCT_THRESHOLD "|"
-    D_CMND_RCT_LOGRAWDATA;
+    D_CMND_RCT_THRESHOLD "|" D_CMND_RCT_LOGRAWDATA;
 
 void (*const RCTCommand[])(void) PROGMEM = {
     &CmndTouchThreshold,

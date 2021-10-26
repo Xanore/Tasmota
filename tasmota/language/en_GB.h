@@ -831,9 +831,9 @@
 #define D_SENSOR_ZEROCROSS     "ZC Pulse"
 #define D_SENSOR_HALLEFFECT    "HallEffect"
 #define D_SENSOR_EPD_DATA      "EPD Data"
-#define D_SENSOR_RC_TOUCH_BTN_OUT    "Touch btn Out"
+#define D_SENSOR_RC_TOUCH_BTN_OUT  "Touch btn Out"
 #define D_SENSOR_RC_TOUCH_BTN_IN   "Touch btn In"
-#warning JJN: Add Touch out/in to other language files
+#warning JJN: Add to other language files
 
 // Units
 #define D_UNIT_AMPERE "A"
@@ -1070,5 +1070,11 @@
 #define D_NEOPOOL_PH_HIGH                 "too high"          // ph Alarms
 #define D_NEOPOOL_PH_LOW                  "too low"
 #define D_NEOPOOL_PUMP_TIME_EXCEEDED      "pump time exceeded"
+
+// xsns_88_RC_Touch.ino
+#define D_JSON_TOUCH_BTN "TouchBtn"
+#define D_JSON_TOUCHED "TOUCHED"
+#define D_JSON_RELEASED "RELEASED"
+#warning JJN: Add to other language files
 
 #endif  // _LANGUAGE_EN_GB_H_
