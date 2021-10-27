@@ -681,7 +681,7 @@ typedef struct {
   uint8_t       weight_change;             // E9F
   uint8_t       web_color2[2][3];          // EA0  Needs to be on integer / 3 distance from web_color
 
-#ifdef XSNS_88_USE_RC_TOUCH_BTN
+#ifdef USE_XSNS_88_RC_TOUCH_BTN
   uint16_t      rct_threshold;             // EA6
   uint8_t       free_ea8[31];              // EA8
 #else

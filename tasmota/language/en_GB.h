@@ -833,7 +833,6 @@
 #define D_SENSOR_EPD_DATA      "EPD Data"
 #define D_SENSOR_RC_TOUCH_BTN_OUT  "Touch btn Out"
 #define D_SENSOR_RC_TOUCH_BTN_IN   "Touch btn In"
-#warning JJN: Add to other language files
 
 // Units
 #define D_UNIT_AMPERE "A"
@@ -1075,6 +1074,6 @@
 #define D_JSON_TOUCH_BTN "TouchBtn"
 #define D_JSON_TOUCHED "TOUCHED"
 #define D_JSON_RELEASED "RELEASED"
-#warning JJN: Add to other language files
+#define D_JSON_HOLD "HOLD"
 
 #endif  // _LANGUAGE_EN_GB_H_

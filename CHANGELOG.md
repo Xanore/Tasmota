@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.5.0.1] 20211027
+### Added
+- xsns_88_RC_Touch.ino - Capacitive Touch input support for Tasmota on ESP8266 by Jeroen Janssen (Xanore)
+- CapacitiveSensor library v0.5.1 from Paul Bagder, Paul Stoffregen
+- Configure module GPIO with 'Touch btn Out' and 'Touch btn In'
+- Command ``SetOption13 0..1`` used like standard button config. (1) Direct report action, TOUCHED, RELEASED. (0) TOUCHED on short touch release, HOLD on long holding
+- Command ``SetOption32 0..100`` used like standard button config (hold duration 0..100 in 0.1sec)
+- Command ``RCTThreshold 0..1000`` used to set the capacitive threshold
+- Command ``RCTShowSensorData`` will output raw capacitive sensor data to determine the correct threshold
+
 ## [Released]
 
 ## [9.5.0] 20210617
