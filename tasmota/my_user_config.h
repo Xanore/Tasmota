@@ -867,6 +867,8 @@
 //#define USE_NEOPOOL                              // Add support for Sugar Valley NeoPool Controller - also known under brands Hidrolife, Aquascenic, Oxilife, Bionet, Hidroniser, UVScenic, Station, Brilix, Bayrol and Hay (+6k flash, +60 mem)
 //  #define NEOPOOL_MODBUS_ADDRESS       1         // Any modbus address
 
+#define USE_XSNS_88_RC_TOUCH_BTN                   // Add support for capacitive touch sensor. Works on an ESP8266
+
 // -- Thermostat control ----------------------------
 //#define USE_THERMOSTAT                           // Add support for Thermostat
   #define THERMOSTAT_CONTROLLER_OUTPUTS         1         // Number of outputs to be controlled independently

@@ -18,6 +18,7 @@
 */
 
 #ifdef USE_XSNS_88_RC_TOUCH_BTN
+#define XSNS_88 88
 
 /*********************************************************************************************\
  * 
@@ -36,13 +37,15 @@
  *          try a lower resistor value. If the value is to high, try a higer resistor value. Use 
  *          the command 'RCTLogRawData' to check the value while released and touched.
  *   
+ * Compile
+ *    Add make sure to add #define XSNS_88_USE_RC_TOUCH_BTN to add this functionality to the build
  * 
  * Configuration
  *    - Configure a digital GPIO pin as 'Touch Btn Out'. This should connect to only the resistor.
  *    - Configure a digital GPIO pin as 'Touch Btn In'. This should connect the the resistor and 
  *      the wire going to the object
- *    NOTE: GPIO D4 and D2 work fine. When selecting a pin wich is combined with RX/TX the ESP8266
- *          might keep rebooting.
+ *    NOTE: WEMOS D1 - GPIO D4 and D2 work fine. When selecting a pin wich is combined with RX/TX 
+ *          the ESP8266 might keep rebooting.
  * 
  * Electric circuit
  * 
@@ -78,7 +81,6 @@
  * 
  *********************************************************************************************/
 
-#define XSNS_88 88
 #include <CapacitiveSensor.h>
 
 // Number of samples used to filter out any spikes

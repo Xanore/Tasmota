@@ -90,10 +90,6 @@ void ButtonTouchFlag(uint32_t button_bit)
 
 void ButtonInit(void)
 {
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "ButtonInit"));
-  bool rcTouchInPresent = false;
-  bool rcTouchOutPresent = false;
-
   Button.present = 0;
 #ifdef ESP8266
   if ((SONOFF_DUAL == TasmotaGlobal.module_type) || (CH4 == TasmotaGlobal.module_type))
