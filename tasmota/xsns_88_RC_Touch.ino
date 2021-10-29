@@ -41,10 +41,12 @@
  *    Add make sure to add #define XSNS_88_USE_RC_TOUCH_BTN to add this functionality to the build
  * 
  * Configuration
+ *    - Use Tasmota template {"NAME":"WEMOS D1 Touch","GPIO":[1,1,7360,1,1,7392,1,1,1,1,1,1,1,1],"FLAG":0,"BASE":18}
+ *      OR
  *    - Configure a digital GPIO pin as 'Touch Btn Out'. This should connect to only the resistor.
  *    - Configure a digital GPIO pin as 'Touch Btn In'. This should connect the the resistor and 
  *      the wire going to the object
- *    NOTE: WEMOS D1 - GPIO D4 and D2 work fine. When selecting a pin wich is combined with RX/TX 
+ *    NOTE: WEMOS D1 - GPIO D4 and D1 work fine. When selecting a pin wich is combined with RX/TX 
  *          the ESP8266 might keep rebooting.
  * 
  * Electric circuit
@@ -54,12 +56,22 @@
  *    'Touch Btn Out'         |
  *                            |
  *                            |
- *    GPIO D2 <---------------+
+ *    GPIO D1 <---------------+
  *    'Touch Btn In'  
  * 
+ *   NOTE: Make sure the 0V of the DC circuit is linked to GND to get a stable reading.
  * 
  * Commands
  *
+ * RCTLogRawData {0..1}
+ *            get/set logging of raw sensor data. Data is send every 1 seconds and can be
+ *            used. Setting is not persistent.
+ *
+ * RCTThreshold {0..1000}
+ *            get/set the threshold (integer) for the capacitive sensor to toggle a 
+ *            touched/released signal. typically this is set around 100 but might differ 
+ *            depending on the size of the touch area. Setting is persistent. 
+ * 
  * SetOption13 {0..1}
  *            get/set how the touch button responses (almost identical to regular buttons)
  *            (1) - Direct response. Action 'TOUCHED', 'RELEASED'
@@ -69,15 +81,6 @@
  * SetOption32 {0..100}
  *            get/set the duration for the HOLD action is send. (identical to regular buttons)
  *            Duration 0..100 in 0.1sec
- * 
- * RCTThreshold {0..1000}
- *            get/set the threshold (integer) for the capacitive sensor to toggle a 
- *            touched/released signal. typically this is set around 100 but might differ 
- *            depending on the size of the touch area. Setting is persistent.
- *
- * RCTLogRawData {0..1}
- *            get/set logging of raw sensor data. Data is send every 1 seconds and can be
- *            used. Setting is not persistent.
  * 
  *********************************************************************************************/
 
