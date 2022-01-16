@@ -87,7 +87,7 @@
 #include <CapacitiveSensor.h>
 
 // Number of samples used to filter out any spikes
-#define AVERAGECOUNT 5
+#define AVERAGECOUNT 1
 
 struct xsns_88_rcTouchBtn
 {
@@ -102,6 +102,7 @@ struct xsns_88_rcTouchBtn
   bool hold = false;
   bool setting_logRawTouch = false;
   uint32_t holdTill_ms = 0;
+  uint32_t autocal_ms = 82800000; // 23 hours
 } rcTouchBtn_data;
 
 void InitRCTouch()
@@ -114,6 +115,8 @@ void InitRCTouch()
     if (rcTouchBtn_data.present)
     {
       rcTouchBtn_data.sensor = new CapacitiveSensor(Pin(GPIO_RC_TOUCH_BTN_OUT), Pin(GPIO_RC_TOUCH_BTN_IN));
+      rcTouchBtn_data.sensor->set_CS_AutocaL_Millis(rcTouchBtn_data.autocal_ms);
+      rcTouchBtn_data.sensor->reset_CS_AutoCal(); // force calibrate
 
       rcTouchBtn_data.readSensorSamples = 100;
       rcTouchBtn_data.i_rawTouchRead = 0;
